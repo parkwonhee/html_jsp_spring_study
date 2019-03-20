@@ -42,7 +42,6 @@ public class HelloServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
 		//response.getWriter().append("Served at: ").append(request.getContextPath());
-		
 		PrintWriter out = response.getWriter();
 		out.print("<html>");
 		out.print("<head>");
@@ -51,7 +50,6 @@ public class HelloServlet extends HttpServlet {
 		out.print("Hello Servlet~java based serverside programe file<br>C:\\Users\\pinka\\eclipse-workspace\\test0319\\src\\com\\servlet<br>Write in here");//
 		out.print("</body>");
 		out.print("</html>");
-
 	}
 
 	/**
