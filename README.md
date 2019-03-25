@@ -212,3 +212,248 @@ jsp request and response 사용법
 <p>firstpage</p><br>
 <% response.sendRedirect("secondpage.jsp"); %>
 ```
+<br><br>
+jsp내장객체
+
+web.xml
+사진
+
+jspEx.jsp
+
+```
+<%@ page errorPage="errorPage.jsp"%>//에러페이지로 가기
+	<%!
+		String adminId;
+		String adminPw;
+		
+		String imgDir;
+		String testServerIP;
+		
+		String str;
+	%>
+	<!-- config 객체 -->
+	<%
+		adminId = config.getInitParameter("adminId");
+		adminPw = config.getInitParameter("adminPw");
+	%>
+	
+	<p>adminId : <%= adminId %></p>
+	<p>adminPw : <%= adminPw %></p>
+	
+	<!-- application 객체 -->
+	<%
+		imgDir = application.getInitParameter("imgDir");
+		testServerIP = application.getInitParameter("testServerIP");
+	%>
+	
+	<p>imgDir : <%= imgDir %></p>
+	<p>testServerIP : <%= testServerIP %></p>
+	
+	<%
+		application.setAttribute("connectedIP", "165.62.58.23");
+	//이것 먼저 실행하기--application 안에서 어디든 실행가능하다.
+		application.setAttribute("connectedUser", "hong");
+	%>
+	<!-- out 객체 -->
+	<%
+		out.print("<h1>Hello JAVA World!!</h1>");
+		out.print("<h2>Hello JSP World!!</h2>");
+		out.print("<h3>Hello Servlet World!!</h3>");
+	%>
+	
+	<!-- exception 객체 -->
+	<%
+		out.print(str.toString());
+	//str초기화가 안되서 errpage로 간다.
+	//errorPage.jsp로 가서 error message : null 이것을 띄운다.
+	%>
+
+```
+
+jspGet.jsp
+```
+<%!
+			String connectedIP;
+			String connectedUser;
+			
+		%>
+		
+		<!-- application 객체 -->
+		<%
+			connectedIP = (String)application.getAttribute("connectedIP");
+		//무조건 string이여야 한다.!!!!
+			connectedUser = (String)application.getAttribute("connectedUser");
+		%>
+		
+		<p>connectedIP : <%= connectedIP %></p>
+		<p>connectedUser : <%= connectedUser %></p>
+```
+
+<br><br>
+servlet의 데이터 공유
+
+servletEx.java
+```
+		//  servlet데이터 공유 방법 3가지 servlet parameter
+		String adminId = getServletConfig().getInitParameter("adminId");
+		String adminPw = getServletConfig().getInitParameter("adminPw");
+		
+		PrintWriter out = response.getWriter();
+		out.print("<p>adminId : "+adminId+"</p>");
+		out.print("<p>adminPw : "+adminPw+"</p>");
+		
+		// context parameter
+		String imgDir = getServletContext().getInitParameter("imgDir"); 
+		String testServerIP = getServletContext().getInitParameter("testServerIP");
+		
+		out.print("<p>imgDir : "+imgDir+"</p>");
+		out.print("<p>testServerIP : "+testServerIP+"</p>");
+		//context attribute
+		getServletContext().setAttribute("connectedIP", "165.62.58.23"); 
+		getServletContext().setAttribute("connectedUser", "hong");
+```
+
+servletGet.java
+```
+		String connectedIP = (String)getServletContext().getAttribute("connectedIP"); 
+		String connectedUser = (String)getServletContext().getAttribute("connectedUser");
+
+		PrintWriter out = response.getWriter();
+		out.print("<p>connectedIP : "+connectedIP+"</p>");
+		out.print("<p>connectedUser : "+connectedUser+"</p>");
+```
+<br><br>
+cookie의 과정(클라이언트에 저장하기)
+
+login.jsp
+
+```
+	<%
+		//login이 이미 되어있나??
+
+	 	Cookie[] cookies = request.getCookies();
+		System.out.println("cookies : "+cookies);
+		
+		if(cookies != null){
+			for(Cookie c : cookies){
+				if(c.getName().equals("memberId")){
+					response.sendRedirect("loginOK.jsp");
+				}
+			}
+		}
+		
+	%>
+	
+	<form action="loginCon" metiod="post">
+	ID <input type="text" name="id"><br>
+	PW <input type="password" name="pw"><br>
+	<input type="submit" value="login">
+	</form>
+
+```
+loginCon.java
+
+```
+		String id = request.getParameter("id"); 
+		String pw = request.getParameter("pw");
+				
+		PrintWriter out = response.getWriter();
+		out.print("<p>id : "+id+"</p>");
+		out.print("<p>pw : "+pw+"</p>");
+		
+		Cookie[] cookies = request.getCookies();
+		Cookie cookie = null;
+		//cookies를 조회
+		for (Cookie c : cookies) {
+			System.out.println ( "c.getName() : " + c.getName() + ", c.getValue() : " + c.getValue());
+			
+			if(c.getName().equals("memberId")) { 
+				cookie = c; 
+			}
+		}
+		if(cookie == null) { 
+			System. out .println ( "cookie is null" ); 
+			cookie = new Cookie("memberId", id); 
+		}
+		response.addCookie(cookie); 
+		cookie.setMaxAge(60*60);//1시간의 완료 기간이다.
+		
+		response.sendRedirect("loginOk.jsp");
+
+```
+
+loginOk.jsp
+
+```
+	<%
+	 	Cookie[] cookies = request.getCookies();
+		for(Cookie c : cookies){
+			out.print("name : "+c.getName()+"<br>");
+			out.print("value : "+c.getValue()+"<br>");
+			out.print("-------------------------");
+		}
+	%>
+```
+
+<br><br>
+session의 과정(서버에 저장하기)
+
+login_se.jsp
+
+```
+	<%
+		if(session.getAttribute("memberId") != null)
+			response.sendRedirect("loginOk2.jsp");
+	%>
+	<form action="loginse" metiod="post">
+		이름 <input type="text" name="name"><br>
+		ID <input type="text" name="id"><br>
+		PW <input type="password" name="pw"><br>
+		<input type="submit" value="login">
+	</form>
+```
+
+loginse.java
+
+```
+		request.setCharacterEncoding("UTF-8");//한글처리
+		
+		response.setContentType("test/html;charset=UTF-8");
+
+		PrintWriter out = response.getWriter();
+
+		String name = request.getParameter("name"); 
+		String id = request.getParameter("id"); 
+		String pw = request.getParameter("pw");
+				
+		out.print("<p>name : "+name+"</p>");
+		out.print("<p>id : "+id+"</p>");
+		out.print("<p>pw : "+pw+"</p>");
+		
+		HttpSession session = request.getSession();
+		session.setAttribute("memberId", id);
+		
+		response.sendRedirect("loginOk2.jsp");
+```
+loginOK2.jsp
+
+```
+	<%
+		session = request.getSession(); 
+		out.print("memberId : " + session.getAttribute("memberId") + "</br>");
+
+	%>
+		<form action="logout" method="post">
+		<input type="submit" value="logout">
+		</form>
+```
+
+logoutse.java
+
+```
+		HttpSession session = request.getSession();
+		session.invalidate();//세션 날리기
+		
+		response.sendRedirect("login_se.jsp");
+
+```
