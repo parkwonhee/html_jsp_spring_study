@@ -505,3 +505,242 @@ public class TempFilter implements Filter {
 
 }
 ```
+
+basic jdbc
+
+newbook.jsp
+```
+	<form action="newBook" method="post">
+		book name : <input type="text" name="book_name"></br>
+		book location : <input type="text" name="book_loc"></br>
+		<input type="submit" value="book register">
+	</form>
+```
+
+NewBook.java
+
+```
+//jdbc 실행순서
+		response.setContentType("text/html; charset=UTF-8");
+		PrintWriter out = response.getWriter();
+		
+		String bookName = request.getParameter("book_name");
+		String bookLoc = request.getParameter("book_loc");
+		
+		String driver = "oracle.jdbc.driver.OracleDriver";//OracleDriver 로딩
+		String url = "jdbc:oracle:thin:@localhost:1521:xe";//실제실무는 ip가 된다.
+		String id = "scott";//아이디 비밀번호
+		String pw = "tiger";
+		
+		Connection con = null;
+		Statement stmt = null;
+		
+		try {//db는 trycatch문이 좋다
+			Class.forName(driver);
+			
+			con = DriverManager.getConnection(url, id, pw);//Java와 Oracle 연결
+			stmt = con.createStatement();//query 전송객체, 통신
+			String sql = "INSERT INTO book(book_id, book_name, book_loc)";//query 작성
+					sql += " VALUES (BOOK_SEQ.NEXTVAL, '" + bookName + "', '" + bookLoc + "')";
+			int result = stmt.executeUpdate(sql);//query 전송-수정할때 !!!
+			
+			if(result == 1) {
+				out.print("INSERT success!!");
+			} else {//0이면 어떤것도 반영되지 않았다라는 의미
+				out.print("INSERT fail!!");
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if(stmt != null) stmt.close();
+				if(con != null) con.close();
+			} catch (Exception e2) {
+				e2.printStackTrace();
+			}
+		}
+```
+
+searchservlet.java
+
+```
+try {
+			Class.forName(driver);
+			con = DriverManager.getConnection(url,id,pw);
+			stmt = con.createStatement();
+			String sql = "SELECT * FROM book";
+			res=stmt.executeQuery(sql);
+			
+			while(res.next()) {
+				int bookid = res.getInt("book_id");
+				String bookname = res.getString("book_name");
+				String bookloc = res.getString("book_loc");
+				
+				out.println("bookId : "+ bookid + " , ");
+				out.println("bookName : "+ bookname + " , ");
+				out.println("bookLoc : "+ bookloc + " , <br> ");
+				
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+```
+
+preparedstatement를 활용한 sql
+modifybook.java
+
+```
+			Class.forName(driver);
+			
+			con = DriverManager.getConnection(url, id, pw);
+			String sql = "UPDATE book SET book_loc = ? WHERE book_name = ?";
+			//sql문 먼저 만들기!!커리문 먼저 만들기 ?
+					
+			pstmt = con.prepareStatement(sql);
+			pstmt.setString(1, "001-00007123");//첫번째 물음표에는 이것이 들어간다.
+			pstmt.setString(2, "book7");
+			
+			int result = pstmt.executeUpdate();
+			
+			if(result == 1) {
+				out.print("UPDATE success!!");
+			} else {
+				out.print("UPDATE fail!!");
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+```
+
+DAO와 DTO의 사용
+
+bookdao.java
+```
+public class BookDAO{
+	String driver = "oracle.jdbc.driver.OracleDriver";
+	String url = "jdbc:oracle:thin:@localhost:1521:xe";
+	String id = "scott";
+	String pw = "tiger";
+	
+	public BookDAO() {
+		try {
+			Class.forName(driver);
+		} catch (Exception e) {
+			e.printStackTrace();		
+		}
+	}
+	
+	public ArrayList<BookDAO> select(){
+		ArrayList<BookDAO> list = new ArrayList<BookDAO>();
+		
+		Connection con = null;
+		PreparedStatement pstmt = null;
+		ResultSet res = null;
+		
+		try {
+			con=DriverManager.getConnection(url,id,pw);
+			String sql = "select * from book";
+			pstmt = con.prepareStatement(sql);
+			res = pstmt.executeQuery();
+			
+			while(res.next()) {
+				int bookid = res.getInt("book_id");
+				String bookname = res.getString("book_name");
+				String bookloc = res.getString("book_loc");
+				
+				bookdto bookdto = new bookdto(bookid, bookname, bookloc); 
+				list.add(bookdto);
+				
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}finally {
+			try {
+				if(res != null) res.close();
+				if(pstmt != null) pstmt.close();
+				if(con != null) con.close();
+			} catch (Exception e2) {
+				e2.printStackTrace();
+			}
+		}
+		
+		return list;
+	}
+}
+```
+
+bookdto.java
+
+```
+public class bookdto {
+	int bookid;
+	String bookname;
+	String bookloc;
+	
+	public bookdto(int bookid,String bookname,String bookloc) {
+		this.bookid = bookid;
+		this.bookname = bookname;
+		this.bookloc = bookloc;
+	}
+
+	public int getBookid() {
+		return bookid;
+	}
+
+	public String getBookname() {
+		return bookname;
+	}
+
+	public String getBookloc() {
+		return bookloc;
+	}
+}
+```
+
+searchbook.java
+
+```
+		BookDAO bookDAO = new BookDAO();
+		ArrayList<BookDAO> list = bookDAO.select();
+		
+		for (int i = 0; i < list.size(); i++) {
+			bookdto dto = list.get(i);
+			int bookId = dto.getBookid();
+			String bookName = dto.getBookname();
+			String bookLoc = dto.getBookloc();
+			
+			out.println("bookId : " + bookId + ", ");
+			out.println("bookName : " + bookName + ", ");
+			out.println("bookLoc : " + bookLoc + "</br>");
+		}
+```
+
+connection pool이용하기
+
+```
+DataSource dataSource;
+/* String driver = "oracle.jdbc.driver.OracleDriver"; 
+String url = "jdbc:oracle:thin:@localhost:1521:xe"; 
+String id = "scott"; String pw = "tiger"; */
+public BookDAO() { 
+try { 
+//Class.forName(driver); 
+Context context = new InitialContext(); 
+dataSource = (DataSource)context.lookup("java:comp/env/jdbc/Oracle11g"); 
+} catch (Exception e) { 
+e.printStackTrace(); 
+} 
+}
+```
+
+```
+public ArrayList<BookDTO> select() {
+ArrayList<BookDTO> list = new ArrayList<BookDTO>();
+Connection con = null; PreparedStatement pstmt = null; ResultSet res = null;
+try { 
+//con = DriverManager.getConnection(url, id, pw); 
+con = dataSource.getConnection();
+```
