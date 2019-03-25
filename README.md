@@ -463,3 +463,45 @@ logoutse.java
 		response.sendRedirect("login_se.jsp");
 
 ```
+
+한글처리 및 필터
+
+```
+ 		jsp에서
+		<% request.setCharacterEncoding("utf-8"); %>
+		servlet에서
+		request.setCharacterEncoding("UTF-8");
+		
+		response.setContentType("test/html;charset=UTF-8");
+```
+filter.java
+
+```
+public class TempFilter implements Filter {
+
+	@Override
+	public void init(FilterConfig arg0) throws ServletException {
+		System.out.println(" -- filter init() --");
+	}
+	
+	@Override
+	public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
+			throws IOException, ServletException {
+		System.out.println(" -- filter doFilter() --");
+		
+		// reqeust filter
+		req.setCharacterEncoding("UTF-8");
+		
+		chain.doFilter(req, res);
+		
+		// response filter
+		
+	}
+	
+	@Override
+	public void destroy() {
+		System.out.println(" -- filter destroy() --");
+	}
+
+}
+```
