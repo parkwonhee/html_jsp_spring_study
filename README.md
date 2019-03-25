@@ -212,3 +212,537 @@ jsp request and response 사용법
 <p>firstpage</p><br>
 <% response.sendRedirect("secondpage.jsp"); %>
 ```
+<br><br>
+jsp내장객체
+
+web.xml
+사진
+![webjsp](https://user-images.githubusercontent.com/38245863/54889266-177d2480-4ee7-11e9-9954-8d8e9019c7e2.PNG)
+
+jspEx.jsp
+
+```
+<%@ page errorPage="errorPage.jsp"%>//에러페이지로 가기
+	<%!
+		String adminId;
+		String adminPw;
+		
+		String imgDir;
+		String testServerIP;
+		
+		String str;
+	%>
+	<!-- config 객체 -->
+	<%
+		adminId = config.getInitParameter("adminId");
+		adminPw = config.getInitParameter("adminPw");
+	%>
+	
+	<p>adminId : <%= adminId %></p>
+	<p>adminPw : <%= adminPw %></p>
+	
+	<!-- application 객체 -->
+	<%
+		imgDir = application.getInitParameter("imgDir");
+		testServerIP = application.getInitParameter("testServerIP");
+	%>
+	
+	<p>imgDir : <%= imgDir %></p>
+	<p>testServerIP : <%= testServerIP %></p>
+	
+	<%
+		application.setAttribute("connectedIP", "165.62.58.23");
+	//이것 먼저 실행하기--application 안에서 어디든 실행가능하다.
+		application.setAttribute("connectedUser", "hong");
+	%>
+	<!-- out 객체 -->
+	<%
+		out.print("<h1>Hello JAVA World!!</h1>");
+		out.print("<h2>Hello JSP World!!</h2>");
+		out.print("<h3>Hello Servlet World!!</h3>");
+	%>
+	
+	<!-- exception 객체 -->
+	<%
+		out.print(str.toString());
+	//str초기화가 안되서 errpage로 간다.
+	//errorPage.jsp로 가서 error message : null 이것을 띄운다.
+	%>
+
+```
+
+jspGet.jsp
+```
+<%!
+			String connectedIP;
+			String connectedUser;
+			
+		%>
+		
+		<!-- application 객체 -->
+		<%
+			connectedIP = (String)application.getAttribute("connectedIP");
+		//무조건 string이여야 한다.!!!!
+			connectedUser = (String)application.getAttribute("connectedUser");
+		%>
+		
+		<p>connectedIP : <%= connectedIP %></p>
+		<p>connectedUser : <%= connectedUser %></p>
+```
+
+<br><br>
+servlet의 데이터 공유
+
+web.xml
+설정 사진
+
+![webservlet](https://user-images.githubusercontent.com/38245863/54889270-1b10ab80-4ee7-11e9-8d8f-ab71355a6f63.PNG)
+
+servletEx.java
+```
+		//  servlet데이터 공유 방법 3가지 servlet parameter
+		String adminId = getServletConfig().getInitParameter("adminId");
+		String adminPw = getServletConfig().getInitParameter("adminPw");
+		
+		PrintWriter out = response.getWriter();
+		out.print("<p>adminId : "+adminId+"</p>");
+		out.print("<p>adminPw : "+adminPw+"</p>");
+		
+		// context parameter
+		String imgDir = getServletContext().getInitParameter("imgDir"); 
+		String testServerIP = getServletContext().getInitParameter("testServerIP");
+		
+		out.print("<p>imgDir : "+imgDir+"</p>");
+		out.print("<p>testServerIP : "+testServerIP+"</p>");
+		//context attribute
+		getServletContext().setAttribute("connectedIP", "165.62.58.23"); 
+		getServletContext().setAttribute("connectedUser", "hong");
+```
+
+servletGet.java
+```
+		String connectedIP = (String)getServletContext().getAttribute("connectedIP"); 
+		String connectedUser = (String)getServletContext().getAttribute("connectedUser");
+
+		PrintWriter out = response.getWriter();
+		out.print("<p>connectedIP : "+connectedIP+"</p>");
+		out.print("<p>connectedUser : "+connectedUser+"</p>");
+```
+<br><br>
+cookie의 과정(클라이언트에 저장하기)
+
+login.jsp
+
+```
+	<%
+		//login이 이미 되어있나??
+
+	 	Cookie[] cookies = request.getCookies();
+		System.out.println("cookies : "+cookies);
+		
+		if(cookies != null){
+			for(Cookie c : cookies){
+				if(c.getName().equals("memberId")){
+					response.sendRedirect("loginOK.jsp");
+				}
+			}
+		}
+		
+	%>
+	
+	<form action="loginCon" metiod="post">
+	ID <input type="text" name="id"><br>
+	PW <input type="password" name="pw"><br>
+	<input type="submit" value="login">
+	</form>
+
+```
+loginCon.java
+
+```
+		String id = request.getParameter("id"); 
+		String pw = request.getParameter("pw");
+				
+		PrintWriter out = response.getWriter();
+		out.print("<p>id : "+id+"</p>");
+		out.print("<p>pw : "+pw+"</p>");
+		
+		Cookie[] cookies = request.getCookies();
+		Cookie cookie = null;
+		//cookies를 조회
+		for (Cookie c : cookies) {
+			System.out.println ( "c.getName() : " + c.getName() + ", c.getValue() : " + c.getValue());
+			
+			if(c.getName().equals("memberId")) { 
+				cookie = c; 
+			}
+		}
+		if(cookie == null) { 
+			System. out .println ( "cookie is null" ); 
+			cookie = new Cookie("memberId", id); 
+		}
+		response.addCookie(cookie); 
+		cookie.setMaxAge(60*60);//1시간의 완료 기간이다.
+		
+		response.sendRedirect("loginOk.jsp");
+
+```
+
+loginOk.jsp
+
+```
+	<%
+	 	Cookie[] cookies = request.getCookies();
+		for(Cookie c : cookies){
+			out.print("name : "+c.getName()+"<br>");
+			out.print("value : "+c.getValue()+"<br>");
+			out.print("-------------------------");
+		}
+	%>
+```
+
+<br><br>
+session의 과정(서버에 저장하기)
+
+login_se.jsp
+
+```
+	<%
+		if(session.getAttribute("memberId") != null)
+			response.sendRedirect("loginOk2.jsp");
+	%>
+	<form action="loginse" metiod="post">
+		이름 <input type="text" name="name"><br>
+		ID <input type="text" name="id"><br>
+		PW <input type="password" name="pw"><br>
+		<input type="submit" value="login">
+	</form>
+```
+
+loginse.java
+
+```
+		request.setCharacterEncoding("UTF-8");//한글처리
+		
+		response.setContentType("test/html;charset=UTF-8");
+
+		PrintWriter out = response.getWriter();
+
+		String name = request.getParameter("name"); 
+		String id = request.getParameter("id"); 
+		String pw = request.getParameter("pw");
+				
+		out.print("<p>name : "+name+"</p>");
+		out.print("<p>id : "+id+"</p>");
+		out.print("<p>pw : "+pw+"</p>");
+		
+		HttpSession session = request.getSession();
+		session.setAttribute("memberId", id);
+		
+		response.sendRedirect("loginOk2.jsp");
+```
+loginOK2.jsp
+
+```
+	<%
+		session = request.getSession(); 
+		out.print("memberId : " + session.getAttribute("memberId") + "</br>");
+
+	%>
+		<form action="logout" method="post">
+		<input type="submit" value="logout">
+		</form>
+```
+
+logoutse.java
+
+```
+		HttpSession session = request.getSession();
+		session.invalidate();//세션 날리기
+		
+		response.sendRedirect("login_se.jsp");
+
+```
+
+한글처리 및 필터
+
+```
+ 		jsp에서
+		<% request.setCharacterEncoding("utf-8"); %>
+		servlet에서
+		request.setCharacterEncoding("UTF-8");
+		
+		response.setContentType("test/html;charset=UTF-8");
+```
+filter.java
+
+```
+public class TempFilter implements Filter {
+
+	@Override
+	public void init(FilterConfig arg0) throws ServletException {
+		System.out.println(" -- filter init() --");
+	}
+	
+	@Override
+	public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
+			throws IOException, ServletException {
+		System.out.println(" -- filter doFilter() --");
+		
+		// reqeust filter
+		req.setCharacterEncoding("UTF-8");
+		
+		chain.doFilter(req, res);
+		
+		// response filter
+		
+	}
+	
+	@Override
+	public void destroy() {
+		System.out.println(" -- filter destroy() --");
+	}
+
+}
+```
+
+basic jdbc
+
+newbook.jsp
+```
+	<form action="newBook" method="post">
+		book name : <input type="text" name="book_name"></br>
+		book location : <input type="text" name="book_loc"></br>
+		<input type="submit" value="book register">
+	</form>
+```
+
+NewBook.java
+
+```
+//jdbc 실행순서
+		response.setContentType("text/html; charset=UTF-8");
+		PrintWriter out = response.getWriter();
+		
+		String bookName = request.getParameter("book_name");
+		String bookLoc = request.getParameter("book_loc");
+		
+		String driver = "oracle.jdbc.driver.OracleDriver";//OracleDriver 로딩
+		String url = "jdbc:oracle:thin:@localhost:1521:xe";//실제실무는 ip가 된다.
+		String id = "scott";//아이디 비밀번호
+		String pw = "tiger";
+		
+		Connection con = null;
+		Statement stmt = null;
+		
+		try {//db는 trycatch문이 좋다
+			Class.forName(driver);
+			
+			con = DriverManager.getConnection(url, id, pw);//Java와 Oracle 연결
+			stmt = con.createStatement();//query 전송객체, 통신
+			String sql = "INSERT INTO book(book_id, book_name, book_loc)";//query 작성
+					sql += " VALUES (BOOK_SEQ.NEXTVAL, '" + bookName + "', '" + bookLoc + "')";
+			int result = stmt.executeUpdate(sql);//query 전송-수정할때 !!!
+			
+			if(result == 1) {
+				out.print("INSERT success!!");
+			} else {//0이면 어떤것도 반영되지 않았다라는 의미
+				out.print("INSERT fail!!");
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if(stmt != null) stmt.close();
+				if(con != null) con.close();
+			} catch (Exception e2) {
+				e2.printStackTrace();
+			}
+		}
+```
+
+searchservlet.java
+
+```
+try {
+			Class.forName(driver);
+			con = DriverManager.getConnection(url,id,pw);
+			stmt = con.createStatement();
+			String sql = "SELECT * FROM book";
+			res=stmt.executeQuery(sql);
+			
+			while(res.next()) {
+				int bookid = res.getInt("book_id");
+				String bookname = res.getString("book_name");
+				String bookloc = res.getString("book_loc");
+				
+				out.println("bookId : "+ bookid + " , ");
+				out.println("bookName : "+ bookname + " , ");
+				out.println("bookLoc : "+ bookloc + " , <br> ");
+				
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+```
+
+preparedstatement를 활용한 sql
+modifybook.java
+
+```
+			Class.forName(driver);
+			
+			con = DriverManager.getConnection(url, id, pw);
+			String sql = "UPDATE book SET book_loc = ? WHERE book_name = ?";
+			//sql문 먼저 만들기!!커리문 먼저 만들기 ?
+					
+			pstmt = con.prepareStatement(sql);
+			pstmt.setString(1, "001-00007123");//첫번째 물음표에는 이것이 들어간다.
+			pstmt.setString(2, "book7");
+			
+			int result = pstmt.executeUpdate();
+			
+			if(result == 1) {
+				out.print("UPDATE success!!");
+			} else {
+				out.print("UPDATE fail!!");
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+```
+
+DAO와 DTO의 사용
+
+bookdao.java
+```
+public class BookDAO{
+	String driver = "oracle.jdbc.driver.OracleDriver";
+	String url = "jdbc:oracle:thin:@localhost:1521:xe";
+	String id = "scott";
+	String pw = "tiger";
+	
+	public BookDAO() {
+		try {
+			Class.forName(driver);
+		} catch (Exception e) {
+			e.printStackTrace();		
+		}
+	}
+	
+	public ArrayList<BookDAO> select(){
+		ArrayList<BookDAO> list = new ArrayList<BookDAO>();
+		
+		Connection con = null;
+		PreparedStatement pstmt = null;
+		ResultSet res = null;
+		
+		try {
+			con=DriverManager.getConnection(url,id,pw);
+			String sql = "select * from book";
+			pstmt = con.prepareStatement(sql);
+			res = pstmt.executeQuery();
+			
+			while(res.next()) {
+				int bookid = res.getInt("book_id");
+				String bookname = res.getString("book_name");
+				String bookloc = res.getString("book_loc");
+				
+				bookdto bookdto = new bookdto(bookid, bookname, bookloc); 
+				list.add(bookdto);
+				
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}finally {
+			try {
+				if(res != null) res.close();
+				if(pstmt != null) pstmt.close();
+				if(con != null) con.close();
+			} catch (Exception e2) {
+				e2.printStackTrace();
+			}
+		}
+		
+		return list;
+	}
+}
+```
+
+bookdto.java
+
+```
+public class bookdto {
+	int bookid;
+	String bookname;
+	String bookloc;
+	
+	public bookdto(int bookid,String bookname,String bookloc) {
+		this.bookid = bookid;
+		this.bookname = bookname;
+		this.bookloc = bookloc;
+	}
+
+	public int getBookid() {
+		return bookid;
+	}
+
+	public String getBookname() {
+		return bookname;
+	}
+
+	public String getBookloc() {
+		return bookloc;
+	}
+}
+```
+
+searchbook.java
+
+```
+		BookDAO bookDAO = new BookDAO();
+		ArrayList<BookDAO> list = bookDAO.select();
+		
+		for (int i = 0; i < list.size(); i++) {
+			bookdto dto = list.get(i);
+			int bookId = dto.getBookid();
+			String bookName = dto.getBookname();
+			String bookLoc = dto.getBookloc();
+			
+			out.println("bookId : " + bookId + ", ");
+			out.println("bookName : " + bookName + ", ");
+			out.println("bookLoc : " + bookLoc + "</br>");
+		}
+```
+
+connection pool이용하기
+
+![1](https://user-images.githubusercontent.com/38245863/54902036-90966f00-4f1b-11e9-8f35-2eda9118da59.PNG)
+
+```
+DataSource dataSource;
+/* String driver = "oracle.jdbc.driver.OracleDriver"; 
+String url = "jdbc:oracle:thin:@localhost:1521:xe"; 
+String id = "scott"; String pw = "tiger"; */
+public BookDAO() { 
+try { 
+//Class.forName(driver); 
+Context context = new InitialContext(); 
+dataSource = (DataSource)context.lookup("java:comp/env/jdbc/Oracle11g"); 
+} catch (Exception e) { 
+e.printStackTrace(); 
+} 
+}
+```
+
+```
+public ArrayList<BookDTO> select() {
+ArrayList<BookDTO> list = new ArrayList<BookDTO>();
+Connection con = null; PreparedStatement pstmt = null; ResultSet res = null;
+try { 
+//con = DriverManager.getConnection(url, id, pw); 
+con = dataSource.getConnection();
+```
