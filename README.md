@@ -217,6 +217,7 @@ jsp내장객체
 
 web.xml
 사진
+![webjsp](https://user-images.githubusercontent.com/38245863/54889266-177d2480-4ee7-11e9-9954-8d8e9019c7e2.PNG)
 
 jspEx.jsp
 
@@ -291,6 +292,11 @@ jspGet.jsp
 
 <br><br>
 servlet의 데이터 공유
+
+web.xml
+설정 사진
+
+![webservlet](https://user-images.githubusercontent.com/38245863/54889270-1b10ab80-4ee7-11e9-8d8f-ab71355a6f63.PNG)
 
 servletEx.java
 ```
