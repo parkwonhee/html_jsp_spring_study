@@ -36,6 +36,7 @@ public class NewBook extends HttpServlet {
 		response.setContentType("text/html; charset=UTF-8");
 		PrintWriter out = response.getWriter();
 		
+		String bookid = request.getParameter("book_id");
 		String bookName = request.getParameter("book_name");
 		String bookLoc = request.getParameter("book_loc");
 		
@@ -53,7 +54,7 @@ public class NewBook extends HttpServlet {
 			con = DriverManager.getConnection(url, id, pw);//Java와 Oracle 연결
 			stmt = con.createStatement();//query 전송객체, 통신
 			String sql = "INSERT INTO book(book_id, book_name, book_loc)";//query 작성
-					sql += " VALUES (BOOK_SEQ.NEXTVAL, '" + bookName + "', '" + bookLoc + "')";//BOOK_SEQ.NEXTVAL
+					sql += " VALUES ('" + bookid + "', '" + bookName + "', '" + bookLoc + "')";
 			int result = stmt.executeUpdate(sql);//query 전송-수정할때 !!!
 			
 			if(result == 1) {

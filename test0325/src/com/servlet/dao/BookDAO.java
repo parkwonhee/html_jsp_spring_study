@@ -6,7 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 
-import com.servlet.dto.bookdto;
+import com.servlet.dto.BookDTO;//import«ÿ¡‡æﬂ «—¥Ÿ!!!!
 
 public class BookDAO{
 	String driver = "oracle.jdbc.driver.OracleDriver";
@@ -40,7 +40,7 @@ public class BookDAO{
 				String bookname = res.getString("book_name");
 				String bookloc = res.getString("book_loc");
 				
-				bookdto bookdto = new bookdto(bookid, bookname, bookloc); 
+				BookDTO bookdto = new BookDTO(bookid, bookname, bookloc); 
 				list.add(bookdto);
 				
 			}
@@ -55,7 +55,6 @@ public class BookDAO{
 				e2.printStackTrace();
 			}
 		}
-		
 		return list;
 	}
 }

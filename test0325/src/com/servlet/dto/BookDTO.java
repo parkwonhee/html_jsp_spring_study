@@ -1,11 +1,11 @@
 package com.servlet.dto;
 
-public class bookdto {
+public class BookDTO {
 	int bookid;
 	String bookname;
 	String bookloc;
 	
-	public bookdto(int bookid,String bookname,String bookloc) {
+	public BookDTO(int bookid,String bookname,String bookloc) {
 		this.bookid = bookid;
 		this.bookname = bookname;
 		this.bookloc = bookloc;
