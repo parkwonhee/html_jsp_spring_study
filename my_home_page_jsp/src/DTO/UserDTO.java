@@ -1,9 +1,9 @@
 package DTO;
 //데이터의 전달을 담당하는 클래스 - DTO
 //사용자 데이터 
-public class userBean {
+public class UserDTO {
 	private String uid,pw,name,email,birth;
-	public userBean(){}
+	public UserDTO(){}
 	
 	public String getUid() {
 		return uid;

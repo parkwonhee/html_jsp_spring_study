@@ -5,50 +5,52 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import DTO.userBean;
+import DTO.UserDTO;
 
-public class userDao {
-	private static userDao instance;
-    private userDao(){}
+public class UserDAO {
+//	private static userDao instance;
+//    private UserDAO(){}
     
     /*private static class LazyHolder {
-        public static final userDao INSTANCE = new userDao();
+        public static final UserDAO INSTANCE = new userDao();
     }
  
-    public static userDao getInstance() {
+    public static UserDAO getInstance() {
         return LazyHolder.INSTANCE;
     }*/
 
     //싱글톤 패턴 Thread safe Lazy initialization (게으른 초기화)
-    public static synchronized userDao getInstance(){
-        if(instance == null ) instance = new userDao();
-        return instance;
-    }
+//    public static synchronized UserDAO getInstance(){
+//        if(instance == null ) instance = new UserDAO();
+//        return instance;
+//    }
     
-    
-   
+    private static UserDAO instance = new UserDAO();
+	private UserDAO(){}
+	public static UserDAO getInstance(){
+		return instance;
+	}
+
     // 회원가입 메서드
-    public void joinUser(userBean bean){
+    public void joinUser(UserDTO bean){
     	String driver = "oracle.jdbc.driver.OracleDriver";
     	String url = "jdbc:oracle:thin:@localhost:1521:xe";
     	String id = "scott";
     	String pw = "tiger";
-    	 try {
-    			Class.forName(driver);
-    		} catch (Exception e) {
-    			e.printStackTrace();		
-    		}
+
         Connection conn = null;
         PreparedStatement pstm = null;
- 
+      
         try {
-            // 쿼리
+        	// JDBC Driver 로딩
+        	Class.forName(driver);
+            // 쿼리Connection 객체 생성 / DB 연결(접속)
         	System.out.println("test7");
-        	conn=DriverManager.getConnection(url,id,pw);
             StringBuffer query = new StringBuffer();
             query.append("INSERT INTO b_user VALUES(?,?,?,?,?)");
             // 커넥션 연결
             //conn = DBConnection.getConnection();
+            conn=DriverManager.getConnection(url,id,pw);
             // 쿼리생성
             pstm = conn.prepareStatement(query.toString());
             
@@ -72,18 +74,13 @@ public class userDao {
             throw new RuntimeException(ex.getMessage());
         } finally {
             try {
-                if (pstm != null) {
-                    pstm.close();
-                    pstm = null;
-                }
-                if (conn != null) {
-                    conn.close();
-                    conn = null;
-                }
+                if (pstm != null) pstm.close();
+                if (conn != null) conn.close();  
             } catch (Exception e) {
                 throw new RuntimeException(e.getMessage());
             }
         }
     } // end joinUser()
 
+    
 }
