@@ -37,6 +37,7 @@
 		// DAO의 insert 메서드 호출 / DTO 객체(data) 전달
 		UserDAO manager = UserDAO.getInstance();
 		manager.joinUser(data);
+		
 		%>
 		<%-- memberList.jsp로 이동 --%>
 		<script>
