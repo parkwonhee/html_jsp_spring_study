@@ -618,6 +618,9 @@ modifybook.java
 DAO와 DTO의 사용
 
 bookdao.java
+
+여기서 import com.servlet.dto.BookDTO;//import해줘야 한다!!!!
+
 ```
 public class BookDAO{
 	String driver = "oracle.jdbc.driver.OracleDriver";
