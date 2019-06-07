@@ -44,7 +44,6 @@
 			alert("회원가입 성공");
 			location.href="memberList.jsp";
 		</script>
-        
         <b>회원가입이 되었습니다.</b><br>
         
 
