@@ -11,6 +11,7 @@
 <title>회원가입 처리 JSP</title>
 </head>
 <body>
+
         <%
        	// 한글 인코딩 처리
         request.setCharacterEncoding("utf-8");
