@@ -6,7 +6,6 @@
 <meta charset="EUC-KR">
 <title>회원가입화면</title>
 </head>
-
 <body>
 	<form action="joinProcess.jsp" method="post">
 		<table border="2">
