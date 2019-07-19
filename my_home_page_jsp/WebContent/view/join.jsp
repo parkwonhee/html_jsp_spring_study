@@ -28,8 +28,7 @@
 		    <tr>
 		        <td>생일(생년월일19000101)</td>
 		        <td><input type="text" name="birth"/></td>
-		    </tr>
-		    
+		    </tr>	    
 		</table>
 		<br><br><input type="submit" value="회원가입">
 	</form>    
