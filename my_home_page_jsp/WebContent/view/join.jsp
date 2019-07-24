@@ -9,6 +9,7 @@
 <body>
 	<form action="joinProcess.jsp" method="post">
 		<table border="2">
+		
 		    <tr>		    
 		        <td>¾ÆÀÌµð</td>
 		        <td><input type="text" name="id" /></td>
