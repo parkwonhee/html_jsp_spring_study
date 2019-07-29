@@ -22,6 +22,7 @@
 		        <td><input type="text" size="20" name="name"/></td>
 		    </tr>
 		    <tr>
+		    
 		        <td>¿Ã∏ﬁ¿œ</td>
 		        <td><input type="text" name="email"/></td>
 		    </tr>
