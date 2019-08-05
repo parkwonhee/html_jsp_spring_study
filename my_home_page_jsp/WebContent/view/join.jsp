@@ -21,6 +21,7 @@
 		        <td>이름</td>
 		        <td><input type="text" size="20" name="name"/></td>
 		    </tr>
+		    
 		    <tr>
 		        <td>이메일</td>
 		        <td><input type="text" name="email"/></td>
